@@ -25,6 +25,19 @@ namespace platf::pen {
       (*raw->pen).set_btn(inputtino::PenTablet::SECONDARY, pen.penButtons & LI_PEN_BUTTON_SECONDARY);
       (*raw->pen).set_btn(inputtino::PenTablet::TERTIARY, pen.penButtons & LI_PEN_BUTTON_TERTIARY);
 
+      // Handle Apple Pencil Pro gestures
+      if (pen.gestureFlags & pen_gestures::SQUEEZE) {
+        // Map squeeze to tertiary button
+        (*raw->pen).set_btn(inputtino::PenTablet::TERTIARY, true);
+      }
+
+      if (pen.gestureFlags & pen_gestures::DOUBLE_TAP) {
+        // Simulate double-click of secondary button
+        (*raw->pen).set_btn(inputtino::PenTablet::SECONDARY, true);
+        usleep(50000);
+        (*raw->pen).set_btn(inputtino::PenTablet::SECONDARY, false);
+      }
+
       // Set the tool
       inputtino::PenTablet::TOOL_TYPE tool;
       switch (pen.toolType) {

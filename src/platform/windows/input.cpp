@@ -1075,6 +1075,18 @@ namespace platf {
       penInfo.penFlags &= ~PEN_FLAG_BARREL;
     }
 
+    // Handle Apple Pencil Pro gestures
+    if (pen.gestureFlags & pen_gestures::SQUEEZE) {
+      // Map squeeze to barrel button
+      penInfo.penFlags |= PEN_FLAG_BARREL;
+    }
+
+    if (pen.gestureFlags & pen_gestures::DOUBLE_TAP) {
+      // Double-tap could be simulated as a rapid press/release
+      // For now, we set the barrel button
+      penInfo.penFlags |= PEN_FLAG_BARREL;
+    }
+
     switch (pen.toolType) {
       default:
       case LI_TOOL_TYPE_PEN:

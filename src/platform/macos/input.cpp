@@ -490,8 +490,27 @@ const KeyCodeMap kKeyCodesMap[] = {
    * @param touch_port The current viewport for translating to screen coordinates.
    * @param pen The pen event.
    */
+  /**
+   * @brief Sends a pen event to the OS.
+   * @param input The client-specific input context.
+   * @param touch_port The current viewport for translating to screen coordinates.
+   * @param pen The pen event.
+   */
   void pen_update(client_input_t *input, const touch_port_t &touch_port, const pen_input_t &pen) {
-    // Unimplemented feature - platform_caps::pen_touch
+    // Handle Apple Pencil Pro gestures on macOS
+    if (pen.gestureFlags & pen_gestures::SQUEEZE) {
+      // Squeeze gesture: could be mapped to a modifier key or custom action
+      // For now, we log it for tracking
+      BOOST_LOG(debug) << "Apple Pencil Squeeze detected with strength: " << pen.squeezeStrength;
+    }
+
+    if (pen.gestureFlags & pen_gestures::DOUBLE_TAP) {
+      // Double-tap gesture: could trigger an action or modifier
+      BOOST_LOG(debug) << "Apple Pencil Double-tap detected";
+    }
+    
+    // Platform-specific pen input handling would go here
+    // This is a placeholder for future macOS pen event support
   }
 
   /**

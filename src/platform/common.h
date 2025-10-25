@@ -280,6 +280,13 @@ namespace platf {
     constexpr caps_t controller_touch = 0x02;  // Controller touch events
   };  // namespace platform_caps
 
+  // Pen gesture flags for Apple Pencil Pro features
+  // These flags can be combined using bitwise OR
+  namespace pen_gestures {
+    constexpr std::uint8_t SQUEEZE = 0x01;  // Squeeze gesture detected (Apple Pencil Pro)
+    constexpr std::uint8_t DOUBLE_TAP = 0x02;  // Double-tap gesture detected (Apple Pencil 2nd gen+)
+  };  // namespace pen_gestures
+
   struct gamepad_state_t {
     std::uint32_t buttonFlags;
     std::uint8_t lt;
@@ -344,12 +351,16 @@ namespace platf {
     float contactAreaMinor;
   };
 
+  // Pen/stylus input event structure
+  // Supports Apple Pencil Pro features (tilt, rotation, pressure, squeeze, double-tap)
   struct pen_input_t {
     std::uint8_t eventType;
     std::uint8_t toolType;
     std::uint8_t penButtons;
     std::uint8_t tilt;  // Degrees (0..90) or LI_TILT_UNKNOWN
     std::uint16_t rotation;  // Degrees (0..360) or LI_ROT_UNKNOWN
+    std::uint8_t gestureFlags;  // Gesture flags (pen_gestures::SQUEEZE | pen_gestures::DOUBLE_TAP)
+    float squeezeStrength;  // Squeeze intensity (0.0-1.0, 0.0 if not squeezed)
     float x;
     float y;
     float pressureOrDistance;  // Distance for hover and pressure for contact

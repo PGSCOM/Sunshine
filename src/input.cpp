@@ -973,6 +973,8 @@ namespace input {
       packet->penButtons,
       packet->tilt,
       rotation,
+      0,  // gestureFlags - initialized to 0, will be set by client if needed
+      0.0f,  // squeezeStrength - initialized to 0.0f
       coords->first,
       coords->second,
       from_clamped_netfloat(packet->pressureOrDistance, 0.0f, 1.0f),
