@@ -1066,8 +1066,8 @@ namespace platf {
     // Populate shared pointer info fields
     populate_common_pointer_info(penInfo.pointerInfo, touch_port, pen.eventType, pen.x, pen.y);
 
-    // Windows only supports a single pen button, so send all buttons as the barrel button
-    if (pen.penButtons) {
+    // Windows only supports a single pen button, so send only PRIMARY as the barrel button
+    if (pen.penButtons & LI_PEN_BUTTON_PRIMARY) {
       penInfo.penFlags |= PEN_FLAG_BARREL;
     } else {
       penInfo.penFlags &= ~PEN_FLAG_BARREL;
@@ -1099,12 +1099,9 @@ namespace platf {
       penInfo.pressure = 0;
     }
 
-    if (pen.rotation != LI_ROT_UNKNOWN) {
-      penInfo.penMask |= PEN_MASK_ROTATION;
-      penInfo.rotation = pen.rotation;
-    } else {
-      penInfo.rotation = 0;
-    }
+    // pen.rotation is azimuth (0..360), not barrel roll
+    // Don't set PEN_MASK_ROTATION — that would be misinterpreted as barrel twist
+    penInfo.rotation = 0;
 
     // We require rotation and tilt to perform the conversion to X and Y tilt angles
     if (pen.tilt != LI_TILT_UNKNOWN && pen.rotation != LI_ROT_UNKNOWN) {
