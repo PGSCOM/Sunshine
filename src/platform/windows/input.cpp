@@ -1066,8 +1066,8 @@ namespace platf {
     // Populate shared pointer info fields
     populate_common_pointer_info(penInfo.pointerInfo, touch_port, pen.eventType, pen.x, pen.y);
 
-    // Windows only supports a single pen button, so send only PRIMARY as the barrel button
-    if (pen.penButtons & LI_PEN_BUTTON_PRIMARY) {
+    // Windows only supports a single pen button, so send PRIMARY or SECONDARY as the barrel button
+    if (pen.penButtons & (LI_PEN_BUTTON_PRIMARY | LI_PEN_BUTTON_SECONDARY)) {
       penInfo.penFlags |= PEN_FLAG_BARREL;
     } else {
       penInfo.penFlags &= ~PEN_FLAG_BARREL;
@@ -1117,6 +1117,12 @@ namespace platf {
     } else {
       penInfo.tiltX = 0;
       penInfo.tiltY = 0;
+    }
+
+    // Barrel roll: contactAreaMajor transporta el roll (0.0–1.0 → 0–360°)
+    if (pen.contactAreaMajor > 0.0f) {
+      penInfo.penMask |= PEN_MASK_ROTATION;
+      penInfo.rotation = (UINT32)(pen.contactAreaMajor * 360.0f);
     }
 
     if (!inject_synthetic_pointer_input(raw->global, raw->pen, &raw->penInfo, 1)) {
