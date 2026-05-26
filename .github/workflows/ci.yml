@@ -24,7 +24,7 @@ jobs:
       azure_signing_endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
       publish_release: false
       release_commit: ${{ github.sha }}
-      release_version: ${{ github.sha }}
+      release_version: "0.0.${{ github.run_number }}"
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
