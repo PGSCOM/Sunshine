@@ -63,6 +63,11 @@ namespace platf::pen {
 
       bool is_touching = pen.eventType == LI_TOUCH_EVENT_DOWN || pen.eventType == LI_TOUCH_EVENT_MOVE;
 
+      // Barrel roll: contactAreaMajor transporta el roll (0.0–1.0 → 0–360°)
+      if (pen.contactAreaMajor > 0.0f) {
+        (*raw->pen).set_wheel(pen.contactAreaMajor);
+      }
+
       (*raw->pen).place_tool(tool, pen.x, pen.y, is_touching ? pen.pressureOrDistance : -1, is_touching ? -1 : pen.pressureOrDistance, tilt_x, tilt_y);
     }
   }
