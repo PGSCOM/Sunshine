@@ -20,31 +20,8 @@ jobs:
       contents: read
     uses: LizardByte/.github/.github/workflows/__call-github-env.yml@master
 
-  release-setup:
-    name: Release Setup
-    outputs:
-      publish_release: ${{ steps.release-setup.outputs.publish_release }}
-      release_body: ${{ steps.release-setup.outputs.release_body }}
-      release_commit: ${{ steps.release-setup.outputs.release_commit }}
-      release_generate_release_notes: ${{ steps.release-setup.outputs.release_generate_release_notes }}
-      release_tag: ${{ steps.release-setup.outputs.release_tag }}
-      release_version: ${{ steps.release-setup.outputs.release_version }}
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Release Setup
-        id: release-setup
-        uses: LizardByte/actions/actions/release_setup@25babf9f2e9f088145ba488339c78c4df9394fc7  # v2026.524.145234
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
   build-docker:
     name: Docker
-    needs: release-setup
     permissions:
       contents: read
       packages: write
@@ -53,10 +30,10 @@ jobs:
       docker_hub_username: ${{ vars.DOCKER_HUB_USERNAME }}
       gh_bot_name: ${{ vars.GH_BOT_NAME }}
       maximize_build_space: true
-      publish_release: ${{ needs.release-setup.outputs.publish_release }}
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_tag: ${{ needs.release-setup.outputs.release_tag }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      publish_release: false
+      release_commit: ${{ github.sha }}
+      release_tag: ${{ github.ref_name }}
+      release_version: ${{ github.sha }}
     secrets:
       DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
@@ -65,40 +42,37 @@ jobs:
 
   build-freebsd:
     name: FreeBSD
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-freebsd.yml
     with:
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
 
   build-homebrew:
     name: Homebrew
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-homebrew.yml
     with:
       git_username: ${{ vars.GH_BOT_NAME }}
-      publish_release: ${{ needs.release-setup.outputs.publish_release }}
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_tag: ${{ needs.release-setup.outputs.release_tag }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      publish_release: false
+      release_commit: ${{ github.sha }}
+      release_tag: ${{ github.ref_name }}
+      release_version: ${{ github.sha }}
     secrets:
       GH_TOKEN: ${{ secrets.GH_BOT_TOKEN }}
       GIT_EMAIL: ${{ secrets.GH_BOT_EMAIL }}
 
   build-macos:
     name: macOS
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-macos.yml
     with:
-      publish_release: ${{ needs.release-setup.outputs.publish_release }}
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      publish_release: false
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
     secrets:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -111,28 +85,25 @@ jobs:
 
   build-linux:
     name: Linux
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-linux.yml
     with:
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
 
   build-archlinux:
     name: Archlinux
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-archlinux.yml
     with:
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
 
   build-linux-copr:
     name: Linux Copr
     if: github.event_name != 'push'  # releases are handled directly in ci-copr.yml
-    needs: release-setup
     permissions:
       contents: write  # needed to update releases
     uses: ./.github/workflows/ci-copr.yml
@@ -143,17 +114,15 @@ jobs:
 
   build-linux-flatpak:
     name: Linux Flatpak
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-flatpak.yml
     with:
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
 
   build-windows:
     name: Windows
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-windows.yml
@@ -161,9 +130,9 @@ jobs:
       azure_signing_account: ${{ vars.AZURE_SIGNING_ACCOUNT }}
       azure_signing_cert_profile: ${{ vars.AZURE_SIGNING_CERT_PROFILE }}
       azure_signing_endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
-      publish_release: ${{ needs.release-setup.outputs.publish_release }}
-      release_commit: ${{ needs.release-setup.outputs.release_commit }}
-      release_version: ${{ needs.release-setup.outputs.release_version }}
+      publish_release: false
+      release_commit: ${{ github.sha }}
+      release_version: ${{ github.sha }}
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -171,7 +140,6 @@ jobs:
 
   bundle-analysis:
     name: Bundle Analysis
-    needs: release-setup
     permissions:
       contents: read
     uses: ./.github/workflows/ci-bundle.yml
@@ -284,11 +252,8 @@ jobs:
 
   release:
     name: Release
-    if:
-      needs.release-setup.outputs.publish_release == 'true' &&
-      startsWith(github.repository, 'LizardByte/')
+    if: false
     needs:
-      - release-setup
       - build-archlinux
       - build-docker
       - build-freebsd
@@ -315,21 +280,18 @@ jobs:
         uses: LizardByte/actions/actions/release_create@25babf9f2e9f088145ba488339c78c4df9394fc7  # v2026.524.145234
         with:
           allowUpdates: false
-          body: ${{ needs.release-setup.outputs.release_body }}
-          generateReleaseNotes: ${{ needs.release-setup.outputs.release_generate_release_notes }}
-          name: ${{ needs.release-setup.outputs.release_tag }}
+          body: ''
+          generateReleaseNotes: false
+          name: ${{ github.ref_name }}
           prerelease: true
-          tag: ${{ needs.release-setup.outputs.release_tag }}
+          tag: ${{ github.ref_name }}
           token: ${{ secrets.GH_BOT_TOKEN }}
           virustotal_api_key: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   release-homebrew-beta:
     name: Release Homebrew Beta
-    if:
-      needs.release-setup.outputs.publish_release == 'true' &&
-      startsWith(github.repository, 'LizardByte/')
+    if: false
     needs:
-      - release-setup
       - build-homebrew
       - release
     permissions:
